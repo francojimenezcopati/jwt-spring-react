@@ -2,9 +2,10 @@
 // import AuthContext from '../context/AuthContext';
 
 import { useState } from 'react';
+import { useAuthContext } from '../hooks/useAuthContext';
 
 const LoginForm = () => {
-	// const {handleLogin} = useContext(AuthContext)
+	const { handleLogin } = useAuthContext();
 
 	const [formData, setFormData] = useState({
 		email: '',
@@ -20,8 +21,8 @@ const LoginForm = () => {
 
 	const handleLoginSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
-		console.log(formData); // Datos del formulario
-		// handleLogin(formData.email, formData.password);
+		// console.log(formData); // Datos del formulario
+		handleLogin({ email: formData.email, password: formData.password });
 	};
 
 	return (

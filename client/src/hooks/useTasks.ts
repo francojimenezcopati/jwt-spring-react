@@ -1,6 +1,8 @@
 import { useEffect, useReducer } from 'react';
 import { Done, FilterValue, Id, Task, TaskContextType } from '../utils/types';
 import { TASK_FILTERS } from '../utils/consts';
+import { getTasks } from '../api/use.api';
+import { useAuthContext } from './useAuthContext';
 
 const initialState: State = {
 	tasks: [],
@@ -89,6 +91,7 @@ const reducer = (state: State, action: Action): State => {
 
 export const useTasks = (): TaskContextType => {
 	const [{ tasks, filterSelected }, dispatch] = useReducer(reducer, initialState);
+	const { tokens } = useAuthContext();
 
 	const handleDelete = ({ id }: { id: Id }) => {
 		dispatch({ type: 'DELETE', payload: { id } });
@@ -111,32 +114,44 @@ export const useTasks = (): TaskContextType => {
 	};
 
 	useEffect(() => {
-		// getTasks().then(tasks => setTasks(tasks))
-		const mockTasks: Task[] = [
-			{
-				id: 1,
-				title: 'Task from hopp',
-				description: 'Desc from tiny',
-				done: false,
-				createdAt: new Date(),
-			},
-			{
-				id: 2,
-				title: 'Task mocked',
-				description: 'Desc mocked',
-				done: true,
-				createdAt: new Date(),
-			},
-			{
-				id: 3,
-				title: 'Clean that',
-				description: 'Do it',
-				done: false,
-				createdAt: new Date(),
-			},
-		];
+        console.log("effect de tasks");
+        
+		getTasks({ accessToken: tokens!.accessToken }).then((tasks) => {
+			let taskToDispatch: Task[];
+			if (tasks === null) {
+				taskToDispatch = [];
+			} else {
+				taskToDispatch = tasks;
+			}
 
-		dispatch({ type: 'INIT_TASKS', payload: { tasks: mockTasks } });
+			dispatch({ type: 'INIT_TASKS', payload: { tasks: taskToDispatch } });
+		});
+		// const mockTasks: Task[] = [
+		// 	{
+		// 		id: 1,
+		// 		title: 'Task from hopp',
+		// 		description: 'Desc from tiny',
+		// 		done: false,
+		// 		createdAt: new Date(),
+		// 	},
+		// 	{
+		// 		id: 2,
+		// 		title: 'Task mocked',
+		// 		description: 'Desc mocked',
+		// 		done: true,
+		// 		createdAt: new Date(),
+		// 	},
+		// 	{
+		// 		id: 3,
+		// 		title: 'Clean that',
+		// 		description: 'Do it',
+		// 		done: false,
+		// 		createdAt: new Date(),
+		// 	},
+		// ];
+
+		// dispatch({ type: 'INIT_TASKS', payload: { tasks: mockTasks } });
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	const activeCount = tasks.filter((task) => !task.done).length;

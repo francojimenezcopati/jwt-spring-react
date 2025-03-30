@@ -12,9 +12,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -89,6 +89,9 @@ public class AuthService {
 
 		String newAccessToken = jwtService.generateToken(user);
 		String newRefreshToken = jwtService.generateRefreshToken(user);
+
+
+		this.revokeAllUserTokens(user);
 		this.saveUserToken(user, newAccessToken, TokenType.ACCESS);
 		this.saveUserToken(user, newRefreshToken, TokenType.REFRESH);
 
@@ -98,21 +101,10 @@ public class AuthService {
 	}
 
 	//
-	public ResponseDTO logout(HttpServletRequest request) {
-		final String authHeader = request.getHeader("Authorization");
-
-		if (authHeader != null && authHeader.startsWith("Bearer ")) {
-			final String accessToken = authHeader.substring(7);
-
-			final String userEmail = jwtService.extractEmail(accessToken);
-
-			final UserDetails userDetails = appUserService.loadUserByUsername(userEmail);
-
-			if (jwtService.isTokenValid(accessToken, userDetails)) {
-				this.revokeAllUserTokens((AppUser) userDetails);
-				SecurityContextHolder.clearContext();
-			}
-		}
+	public ResponseDTO logout() {
+		AppUser currentUser = this.obtainAuthenticatedUser();
+		this.revokeAllUserTokens(currentUser);
+		SecurityContextHolder.clearContext();
 
 		return new ResponseDTO(true, "Logged out successfully", null, HttpStatus.OK);
 	}
@@ -144,5 +136,21 @@ public class AuthService {
 		});
 		tokenRepository.saveAll(validTokens);
 	}
+
+	private AppUser obtainAuthenticatedUser() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+		if (authentication == null) {
+			throw new IllegalStateException("An authenticated user must exist in the session to logout");
+		}
+
+		// Obtener el email del usuario autenticado
+		String email = authentication.getName();
+
+		AppUser appUser = (AppUser) this.appUserService.loadUserByUsername(email);
+
+		return appUser;
+	}
+
 
 }

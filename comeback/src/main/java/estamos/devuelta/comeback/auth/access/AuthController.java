@@ -2,7 +2,6 @@ package estamos.devuelta.comeback.auth.access;
 
 import estamos.devuelta.comeback.ResponseDTO;
 import estamos.devuelta.comeback.auth.config.token.RefreshTokenRequestDTO;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,8 +34,8 @@ public class AuthController {
 	}
 
 	@PostMapping(path = "logout")
-	public ResponseEntity<ResponseDTO> logout(HttpServletRequest request) {
-		ResponseDTO response = this.authService.logout(request);
+	public ResponseEntity<ResponseDTO> logout() {
+		ResponseDTO response = this.authService.logout();
 
 		return new ResponseEntity<>(response, response.status());
 	}

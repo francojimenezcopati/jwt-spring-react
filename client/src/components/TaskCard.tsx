@@ -18,6 +18,9 @@ const TaskCard: FC<Props> = ({ task }) => {
 	//     }
 	// };
 
+    console.log(task);
+    
+
 	return (
 		<div className='view '>
 			<input
@@ -31,7 +34,7 @@ const TaskCard: FC<Props> = ({ task }) => {
 				<div className='flex justify-between pr-10'>
 					<span>{task.title} </span>
 
-					<span className='text-lg text-gray-500'>{task.createdAt.toLocaleDateString()}</span>
+					<span className='text-lg text-gray-500'>{task.createdAt}</span>
 				</div>
 			</label>
 			<button className='button-todo destroy hover:cursor-pointer' onClick={() => deleteHandler({ id: task.id })} />
