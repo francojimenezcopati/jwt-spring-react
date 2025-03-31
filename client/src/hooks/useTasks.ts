@@ -1,7 +1,7 @@
 import { useEffect, useReducer } from 'react';
-import { Done, FilterValue, Id, Task, TaskContextType } from '../utils/types';
+import { FilterValue, Id, Task, TaskContextType, TaskRequest } from '../utils/types';
 import { TASK_FILTERS } from '../utils/consts';
-import { getTasks } from '../api/use.api';
+import { deleteTask, getTasks, updateTask } from '../api/use.api';
 import { useAuthContext } from './useAuthContext';
 
 const initialState: State = {
@@ -19,7 +19,7 @@ const initialState: State = {
 type Action =
 	| { type: 'INIT_TASKS'; payload: { tasks: Task[] } }
 	| { type: 'CLEAR_COMPLETED' }
-	| { type: 'COMPLETED'; payload: { id: Id; done: Done } }
+	| { type: 'UPDATE'; payload: { id: Id; task: Task } }
 	| { type: 'FILTER_CHANGE'; payload: { filter: FilterValue } }
 	| { type: 'DELETE'; payload: { id: Id } };
 // | { type: 'CREATE'; payload: {title: Title, description: Description, done: Done}}
@@ -46,19 +46,11 @@ const reducer = (state: State, action: Action): State => {
 				tasks: tasks.filter((task) => !task.done),
 			};
 		}
-		case 'COMPLETED': {
-			const { id, done } = action.payload;
-
-			const updatedTasks = state.tasks.map((task) => {
-				if (task.id === id) {
-					task.done = done;
-				}
-				return task;
-			});
-
+		case 'UPDATE': {
+			const { id, task } = action.payload;
 			return {
 				...state,
-				tasks: updatedTasks,
+				tasks: state.tasks.map((t) => (t.id === id ? task : t)),
 			};
 		}
 		case 'FILTER_CHANGE': {
@@ -76,32 +68,37 @@ const reducer = (state: State, action: Action): State => {
 				tasks: tasks.filter((task) => task.id != id),
 			};
 		}
-		// case 'UPDATE': {
-		// 	const { id, title, description, done } = action.payload;
-		//     const {tasks} = state
-
-		//     const taskToUpdate = tasks.find((task) => task.id != id);
-		// 	return {
-		// 		...state,
-		// 		tasks,
-		// 	};
-		// }
 	}
 };
 
 export const useTasks = (): TaskContextType => {
 	const [{ tasks, filterSelected }, dispatch] = useReducer(reducer, initialState);
 	const { tokens } = useAuthContext();
+	const accessToken = tokens ? tokens.accessToken : '';
 
-	const handleDelete = ({ id }: { id: Id }) => {
-		dispatch({ type: 'DELETE', payload: { id } });
+	const handleDelete = async ({ id }: { id: Id }) => {
+		const success = await deleteTask({ accessToken, id });
+
+		if (success) {
+			dispatch({ type: 'DELETE', payload: { id } });
+		}
 	};
 
-	const handleCompleted = ({ id, done }: Pick<Task, 'id' | 'done'>) => {
-		dispatch({ type: 'COMPLETED', payload: { id, done } });
+	const handleUpdate = async ({ id, task }: { id: Id; task: Task }) => {
+		const taskRequest: TaskRequest = {
+			title: task.title,
+			description: task.description,
+			done: task.done,
+		};
+
+		const updatedTask = await updateTask({ accessToken, id, task: taskRequest });
+
+		if (updatedTask) {
+			dispatch({ type: 'UPDATE', payload: { id, task: updatedTask } });
+		}
 	};
 
-	const handleFilterChange = (filter: FilterValue) => {
+	const handleFilterChange = ({ filter }: { filter: FilterValue }) => {
 		dispatch({ type: 'FILTER_CHANGE', payload: { filter } });
 
 		const params = new URLSearchParams(window.location.search);
@@ -114,44 +111,15 @@ export const useTasks = (): TaskContextType => {
 	};
 
 	useEffect(() => {
-        console.log("effect de tasks");
-        
-		getTasks({ accessToken: tokens!.accessToken }).then((tasks) => {
-			let taskToDispatch: Task[];
-			if (tasks === null) {
-				taskToDispatch = [];
-			} else {
-				taskToDispatch = tasks;
-			}
-
-			dispatch({ type: 'INIT_TASKS', payload: { tasks: taskToDispatch } });
-		});
-		// const mockTasks: Task[] = [
-		// 	{
-		// 		id: 1,
-		// 		title: 'Task from hopp',
-		// 		description: 'Desc from tiny',
-		// 		done: false,
-		// 		createdAt: new Date(),
-		// 	},
-		// 	{
-		// 		id: 2,
-		// 		title: 'Task mocked',
-		// 		description: 'Desc mocked',
-		// 		done: true,
-		// 		createdAt: new Date(),
-		// 	},
-		// 	{
-		// 		id: 3,
-		// 		title: 'Clean that',
-		// 		description: 'Do it',
-		// 		done: false,
-		// 		createdAt: new Date(),
-		// 	},
-		// ];
-
-		// dispatch({ type: 'INIT_TASKS', payload: { tasks: mockTasks } });
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+		if (tokens)
+			getTasks({ accessToken: tokens.accessToken }).then((tasks) => {
+				let taskToDispatch: Task[] = [];
+				if (tasks !== null) {
+					taskToDispatch = tasks;
+				}
+				dispatch({ type: 'INIT_TASKS', payload: { tasks: taskToDispatch } });
+			});
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	const activeCount = tasks.filter((task) => !task.done).length;
@@ -167,8 +135,8 @@ export const useTasks = (): TaskContextType => {
 		activeCount,
 		completedCount,
 		filterSelected,
+		handleUpdate,
 		onClearCompleted,
-		handleCompleted,
 		handleFilterChange,
 		handleDelete,
 		filteredTasks,

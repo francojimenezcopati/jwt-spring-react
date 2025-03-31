@@ -9,7 +9,7 @@ export const API_URLS = {
 export const METHODS = {
     POST: "POST",
     GET: "GET",
-    UPDATE: "UPDATE",
+    PUT: "PUT",
     DELETE: "DELETE",
 }
 

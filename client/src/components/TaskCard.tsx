@@ -9,7 +9,7 @@ interface Props {
 }
 
 const TaskCard: FC<Props> = ({ task }) => {
-	const { handleCompleted: onToggleDone, handleDelete: deleteHandler } = useTaskContext();
+	const { handleDelete: deleteHandler, handleUpdate } = useTaskContext();
 	// const navigate = useNavigate();
 
 	// const handleCardClick = (e) => {
@@ -17,8 +17,7 @@ const TaskCard: FC<Props> = ({ task }) => {
 	//         navigate(`/tasks/${task.id}`);
 	//     }
 	// };
-
-    console.log(task);
+    // console.log(task);
     
 
 	return (
@@ -28,7 +27,7 @@ const TaskCard: FC<Props> = ({ task }) => {
 				name='done'
 				className='toggle'
 				checked={task.done}
-				onChange={(e) => onToggleDone({ id: task.id, done: e.target.checked })}
+				onChange={(e) => handleUpdate({ id: task.id, task: { ...task, done: e.target.checked } })}
 			/>
 			<label>
 				<div className='flex justify-between pr-10'>

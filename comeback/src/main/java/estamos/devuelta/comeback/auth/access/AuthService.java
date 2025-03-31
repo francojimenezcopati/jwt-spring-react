@@ -7,12 +7,10 @@ import estamos.devuelta.comeback.auth.config.token.Token;
 import estamos.devuelta.comeback.auth.config.token.TokenRepository;
 import estamos.devuelta.comeback.auth.config.token.TokenResponseDTO;
 import estamos.devuelta.comeback.auth.config.token.TokenType;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -101,8 +99,8 @@ public class AuthService {
 	}
 
 	//
-	public ResponseDTO logout() {
-		AppUser currentUser = this.obtainAuthenticatedUser();
+	public ResponseDTO logout(String email) {
+		AppUser currentUser = (AppUser) this.appUserService.loadUserByUsername(email);
 		this.revokeAllUserTokens(currentUser);
 		SecurityContextHolder.clearContext();
 
@@ -136,21 +134,4 @@ public class AuthService {
 		});
 		tokenRepository.saveAll(validTokens);
 	}
-
-	private AppUser obtainAuthenticatedUser() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-		if (authentication == null) {
-			throw new IllegalStateException("An authenticated user must exist in the session to logout");
-		}
-
-		// Obtener el email del usuario autenticado
-		String email = authentication.getName();
-
-		AppUser appUser = (AppUser) this.appUserService.loadUserByUsername(email);
-
-		return appUser;
-	}
-
-
 }

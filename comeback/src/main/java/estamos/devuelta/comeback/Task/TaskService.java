@@ -84,12 +84,15 @@ public class TaskService {
 		}
 	}
 
+	@Transactional
 	public ResponseDTO deleteTaskById(Long id) {
 		AppUser appUser = this.obtainAuthenticatedUser();
 
 		List<Task> tasks = appUser.getTasks().stream().filter(t -> t.getId().equals(id)).toList();
 
 		if (!tasks.isEmpty()) {
+			Task taskToDelete = tasks.getFirst();
+			appUser.getTasks().remove(taskToDelete);
 			this.taskRepository.deleteById(id);
 
 			return new ResponseDTO(true, "Task deleted successfully", null, HttpStatus.OK);

@@ -7,7 +7,7 @@ const Filters: React.FC = () => {
 
 	const handleClick = (filter: FilterValue) => (e: React.MouseEvent<HTMLAnchorElement>) => {
 		e.preventDefault();
-		handleFilterChange(filter);
+		handleFilterChange({ filter });
 	};
 
 	return (

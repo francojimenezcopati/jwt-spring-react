@@ -1,5 +1,11 @@
 import { TASK_FILTERS } from './consts';
 
+export interface TaskRequest {
+	title: string;
+	description: string;
+	done: boolean;
+}
+
 export interface Task {
 	id: number;
 	title: string;
@@ -22,9 +28,9 @@ interface TaskContextType {
 	filteredTasks: Task[];
 	filterSelected: FilterValue;
 	onClearCompleted: () => void;
-	handleCompleted: ({ id, done }: Pick<Task, 'id' | 'done'>) => void;
-	handleFilterChange: (filter: FilterValue) => void;
-	handleDelete: (id: { id: number }) => void;
+	handleFilterChange: ({ filter }: { filter: FilterValue }) => void;
+	handleDelete: ({ id }: { id: number }) => void;
+	handleUpdate: ({ id, task }: { id: number; task: Task }) => void;
 }
 
 interface Tokens {

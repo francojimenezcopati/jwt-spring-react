@@ -1,6 +1,6 @@
 import { toast } from 'sonner';
 import { API_URLS, METHODS } from '../utils/consts';
-import { ApiResponse, Task, Tokens } from '../utils/types';
+import { ApiResponse, Id, Task, TaskRequest, Tokens } from '../utils/types';
 
 const ContentTypeHeader = { 'Content-Type': 'application/json' } as const;
 
@@ -28,16 +28,16 @@ export const login = async ({ email, password }: { email: string; password: stri
 	}
 };
 
-export const logout = async ({ accessToken }: { accessToken: string }): Promise<boolean> => {
-	console.log(accessToken);
+export const logout = async ({ email }: { email: string }): Promise<boolean> => {
+	console.log(email);
 
 	try {
 		const rawRes = await fetch(API_URLS.AUTH + 'logout', {
 			method: METHODS.POST,
 			headers: {
 				...ContentTypeHeader,
-				Authorization: 'Bearer ' + accessToken,
 			},
+			body: JSON.stringify({ email }),
 		});
 		const res: ApiResponse<null> = await rawRes.json();
 
@@ -55,8 +55,6 @@ export const logout = async ({ accessToken }: { accessToken: string }): Promise<
 };
 
 export const refresh = async ({ refreshToken }: { refreshToken: string }): Promise<Tokens | null> => {
-	console.log(refreshToken);
-
 	try {
 		const rawRes = await fetch(API_URLS.AUTH + 'refresh', {
 			method: METHODS.POST,
@@ -69,6 +67,8 @@ export const refresh = async ({ refreshToken }: { refreshToken: string }): Promi
 
 		if (res.success) {
 			// toast.success(res.message);
+			console.log('Tokens refreshed');
+
 			return res.content;
 		} else {
 			toast.error(res.message);
@@ -80,12 +80,9 @@ export const refresh = async ({ refreshToken }: { refreshToken: string }): Promi
 	}
 };
 
-
 export const getTasks = async ({ accessToken }: { accessToken: string }): Promise<Task[] | null> => {
-    console.log(accessToken);
-    
 	try {
-		const rawRes = await fetch(API_URLS.TASKS , {
+		const rawRes = await fetch(API_URLS.TASKS, {
 			method: METHODS.GET,
 			headers: {
 				...ContentTypeHeader,
@@ -95,7 +92,6 @@ export const getTasks = async ({ accessToken }: { accessToken: string }): Promis
 		const res: ApiResponse<Task[]> = await rawRes.json();
 
 		if (res.success) {
-			toast.success(res.message);
 			return res.content;
 		} else {
 			toast.error(res.message);
@@ -104,5 +100,69 @@ export const getTasks = async ({ accessToken }: { accessToken: string }): Promis
 	} catch (e) {
 		toast.error((e as Error).message);
 		return null;
+	}
+};
+
+export const updateTask = async ({
+	accessToken,
+	id,
+	task,
+}: {
+	accessToken: string;
+	id: Id;
+	task: TaskRequest;
+}): Promise<Task | null> => {
+	try {
+		const rawRes = await fetch(API_URLS.TASKS + id, {
+			method: METHODS.PUT,
+			headers: {
+				...ContentTypeHeader,
+				Authorization: 'Bearer ' + accessToken,
+			},
+			body: JSON.stringify( task ),
+		});
+		const res: ApiResponse<Task | null> = await rawRes.json();
+
+		if (res.success && res.content) {
+			toast.success(res.message);
+		} else {
+			toast.error(res.message);
+		}
+
+		return res.content;
+	} catch (e) {
+		toast.error((e as Error).message);
+		return null;
+	}
+};
+
+
+export const deleteTask = async ({
+	accessToken,
+	id,
+}: {
+	accessToken: string;
+	id: Id;
+}): Promise<boolean> => {
+	try {
+		const rawRes = await fetch(API_URLS.TASKS + id, {
+			method: METHODS.DELETE,
+			headers: {
+				...ContentTypeHeader,
+				Authorization: 'Bearer ' + accessToken,
+			},
+		});
+		const res: ApiResponse<null> = await rawRes.json();
+
+		if (res.success) {
+			toast.success(res.message);
+		} else {
+			toast.error(res.message);
+		}
+
+		return res.success;
+	} catch (e) {
+		toast.error((e as Error).message);
+		return false;
 	}
 };

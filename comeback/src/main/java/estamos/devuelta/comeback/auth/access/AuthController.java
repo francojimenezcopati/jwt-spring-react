@@ -34,8 +34,8 @@ public class AuthController {
 	}
 
 	@PostMapping(path = "logout")
-	public ResponseEntity<ResponseDTO> logout() {
-		ResponseDTO response = this.authService.logout();
+	public ResponseEntity<ResponseDTO> logout(@RequestBody LogoutRequest logoutRequest) {
+		ResponseDTO response = this.authService.logout(logoutRequest.email());
 
 		return new ResponseEntity<>(response, response.status());
 	}
