@@ -8,6 +8,7 @@ import { AuthProvider } from './context/AuthContext';
 import PrivateRoute from './utils/PrivateRoute';
 import NavBar from './components/NavBar';
 import { Toaster } from 'sonner';
+import SignupPage from './pages/SignupPage';
 
 const App: FC = () => {
 	return (
@@ -20,6 +21,7 @@ const App: FC = () => {
 						<div className='container max-w-[600px] '>
 							<Routes>
 								<Route path='/login' element={<LoginPage />} />
+								<Route path='/signup' element={<SignupPage />} />
 								<Route path='/' element={<Navigate to='/tasks' />} />
 								<Route
 									path='/tasks'
@@ -31,6 +33,14 @@ const App: FC = () => {
 								/>
 								<Route
 									path='/tasks/:id'
+									element={
+										<PrivateRoute>
+											<TaskDetails />
+										</PrivateRoute>
+									}
+								/>
+								<Route
+									path='/tasks/create'
 									element={
 										<PrivateRoute>
 											<TaskDetails />

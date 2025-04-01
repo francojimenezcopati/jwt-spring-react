@@ -60,6 +60,23 @@ public class TaskService {
 	}
 
 	@Transactional
+	public ResponseDTO deleteAllTasks() {
+		AppUser appUser = this.obtainAuthenticatedUser();
+
+		List<Task> tasks = appUser.getTasks().stream().filter(Task::isDone).toList();
+
+		appUser.getTasks().removeAll(tasks);
+
+		try {
+			this.taskRepository.deleteAll(tasks);
+			return new ResponseDTO(true, "All tasks deleted", null, HttpStatus.OK);
+		} catch (Exception e) {
+			return new ResponseDTO(false, "An error occurred trying to delete the tasks: " + e.getMessage(), null,
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	@Transactional
 	public ResponseDTO updateTask(Long id, TaskRequestDTO taskRequestDTO) {
 		AppUser appUser = this.obtainAuthenticatedUser();
 
@@ -115,4 +132,5 @@ public class TaskService {
 
 		return appUser;
 	}
+
 }

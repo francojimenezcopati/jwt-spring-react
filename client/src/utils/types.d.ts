@@ -31,6 +31,7 @@ interface TaskContextType {
 	handleFilterChange: ({ filter }: { filter: FilterValue }) => void;
 	handleDelete: ({ id }: { id: number }) => void;
 	handleUpdate: ({ id, task }: { id: number; task: Task }) => void;
+	handleCreate: ({ task }: { task: TaskRequest }) => void;
 }
 
 interface Tokens {
@@ -39,6 +40,17 @@ interface Tokens {
 }
 
 interface AuthContextType {
+	handleRegister: ({
+		firstName,
+		lastName,
+		email,
+		password,
+	}: {
+		firstName: string;
+		lastName: string;
+		email: string;
+		password: string;
+	}) => Promise<void>;
 	handleLogin: ({ email, password }: { email: string; password: string }) => Promise<void>;
 	tokens: Tokens | null;
 	handleLogout: () => void;

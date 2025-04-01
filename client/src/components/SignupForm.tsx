@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useAuthContext } from '../hooks/useAuthContext';
 
-const LoginForm = () => {
-	const { handleLogin } = useAuthContext();
+const SignupForm = () => {
+	const { handleRegister } = useAuthContext();
 
 	const [formData, setFormData] = useState({
+		firstName: '',
+		lastName: '',
 		email: '',
 		password: '',
 	});
@@ -18,8 +20,9 @@ const LoginForm = () => {
 
 	const handleLoginSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
-		// console.log(formData); // Datos del formulario
-		handleLogin({ email: formData.email, password: formData.password });
+		console.log(formData); // Datos del formulario
+
+		handleRegister({ ...formData });
 	};
 
 	return (
@@ -27,8 +30,24 @@ const LoginForm = () => {
 			<input
 				className='appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline'
 				type='text'
+				name='firstName'
+				placeholder='First name'
+				value={formData.firstName}
+				onChange={handleChange}
+			/>
+			<input
+				className='appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline'
+				type='text'
+				name='lastName'
+				placeholder='Last name'
+				value={formData.lastName}
+				onChange={handleChange}
+			/>
+			<input
+				className='appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline'
+				type='text'
 				name='email'
-				placeholder='Enter your email'
+				placeholder='Email'
 				value={formData.email}
 				onChange={handleChange}
 			/>
@@ -36,7 +55,7 @@ const LoginForm = () => {
 				className='appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline'
 				type='password'
 				name='password'
-				placeholder='Enter your password'
+				placeholder='Password'
 				value={formData.password}
 				onChange={handleChange}
 			/>
@@ -48,4 +67,4 @@ const LoginForm = () => {
 	);
 };
 
-export default LoginForm;
+export default SignupForm;

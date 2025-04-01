@@ -2,6 +2,7 @@
 import { FC } from 'react';
 import { Task } from '../utils/types';
 import { useTaskContext } from '../hooks/useTaskContext';
+import { useNavigate } from 'react-router-dom';
 // import { deleteTask } from "../api/task.api";
 
 interface Props {
@@ -10,15 +11,11 @@ interface Props {
 
 const TaskCard: FC<Props> = ({ task }) => {
 	const { handleDelete: deleteHandler, handleUpdate } = useTaskContext();
-	// const navigate = useNavigate();
+	const navigate = useNavigate();
 
-	// const handleCardClick = (e) => {
-	//     if (!e.target.matches("img")) {
-	//         navigate(`/tasks/${task.id}`);
-	//     }
-	// };
-    // console.log(task);
-    
+	const handleTaskClick = () => {
+		navigate(`/tasks/${task.id}`);
+	};
 
 	return (
 		<div className='view '>
@@ -30,8 +27,8 @@ const TaskCard: FC<Props> = ({ task }) => {
 				onChange={(e) => handleUpdate({ id: task.id, task: { ...task, done: e.target.checked } })}
 			/>
 			<label>
-				<div className='flex justify-between pr-10'>
-					<span>{task.title} </span>
+				<div className='flex justify-between pr-10 ' >
+					<span className='hover:cursor-pointer' onClick={() => handleTaskClick()}>{task.title} </span>
 
 					<span className='text-lg text-gray-500'>{task.createdAt}</span>
 				</div>

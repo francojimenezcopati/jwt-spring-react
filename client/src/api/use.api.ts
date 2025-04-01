@@ -4,6 +4,40 @@ import { ApiResponse, Id, Task, TaskRequest, Tokens } from '../utils/types';
 
 const ContentTypeHeader = { 'Content-Type': 'application/json' } as const;
 
+export const register = async ({
+	firstName,
+	lastName,
+	email,
+	password,
+}: {
+	firstName: string;
+	lastName: string;
+	email: string;
+	password: string;
+}): Promise<boolean> => {
+	try {
+		const rawRes = await fetch(API_URLS.AUTH + 'register', {
+			method: METHODS.POST,
+			headers: {
+				...ContentTypeHeader,
+			},
+			body: JSON.stringify({ firstName, lastName, email, password }),
+		});
+		const res: ApiResponse<null> = await rawRes.json();
+
+		if (res.success) {
+			toast.success(res.message);
+		} else {
+			toast.error(res.message);
+		}
+
+		return res.success;
+	} catch (e) {
+		toast.error((e as Error).message);
+		return false;
+	}
+};
+
 export const login = async ({ email, password }: { email: string; password: string }): Promise<Tokens | null> => {
 	try {
 		const rawRes = await fetch(API_URLS.AUTH + 'login', {
@@ -119,7 +153,7 @@ export const updateTask = async ({
 				...ContentTypeHeader,
 				Authorization: 'Bearer ' + accessToken,
 			},
-			body: JSON.stringify( task ),
+			body: JSON.stringify(task),
 		});
 		const res: ApiResponse<Task | null> = await rawRes.json();
 
@@ -136,14 +170,7 @@ export const updateTask = async ({
 	}
 };
 
-
-export const deleteTask = async ({
-	accessToken,
-	id,
-}: {
-	accessToken: string;
-	id: Id;
-}): Promise<boolean> => {
+export const deleteTask = async ({ accessToken, id }: { accessToken: string; id: Id }): Promise<boolean> => {
 	try {
 		const rawRes = await fetch(API_URLS.TASKS + id, {
 			method: METHODS.DELETE,
@@ -164,5 +191,54 @@ export const deleteTask = async ({
 	} catch (e) {
 		toast.error((e as Error).message);
 		return false;
+	}
+};
+
+export const deleteAllTasks = async ({ accessToken }: { accessToken: string }): Promise<boolean> => {
+	try {
+		const rawRes = await fetch(API_URLS.TASKS, {
+			method: METHODS.DELETE,
+			headers: {
+				...ContentTypeHeader,
+				Authorization: 'Bearer ' + accessToken,
+			},
+		});
+		const res: ApiResponse<null> = await rawRes.json();
+
+		if (res.success) {
+			toast.success(res.message);
+		} else {
+			toast.error(res.message);
+		}
+
+		return res.success;
+	} catch (e) {
+		toast.error((e as Error).message);
+		return false;
+	}
+};
+
+export const createTask = async ({ accessToken, task }: { accessToken: string; task: TaskRequest }): Promise<Task | null> => {
+	try {
+		const rawRes = await fetch(API_URLS.TASKS, {
+			method: METHODS.POST,
+			headers: {
+				...ContentTypeHeader,
+				Authorization: 'Bearer ' + accessToken,
+			},
+			body: JSON.stringify(task),
+		});
+		const res: ApiResponse<Task | null> = await rawRes.json();
+
+		if (res.success && res.content) {
+			toast.success(res.message);
+		} else {
+			toast.error(res.message);
+		}
+
+		return res.content;
+	} catch (e) {
+		toast.error((e as Error).message);
+		return null;
 	}
 };

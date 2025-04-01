@@ -1,143 +1,144 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { useNavigate, useParams } from 'react-router-dom';
-import { Description, Done, Task, Title } from '../utils/types';
+import { Task, TaskRequest } from '../utils/types';
 import { useEffect, useState } from 'react';
 import { useTaskContext } from '../hooks/useTaskContext';
-
-interface TaskDetails {
-	title: Title;
-	description: Description;
-	done: Done;
-}
 
 const TaskForm: React.FC = () => {
 	const navigate = useNavigate();
 	const params = useParams();
-	const { filteredTasks } = useTaskContext();
+	const { filteredTasks, handleUpdate, handleCreate } = useTaskContext();
 
-	const initialState: TaskDetails = {
+	const initialState: TaskRequest = {
 		title: '',
 		description: '',
 		done: false,
 	} as const;
 
-	const [formData, setFormData] = useState<TaskDetails>(initialState);
+	const [formData, setFormData] = useState<TaskRequest>(initialState);
 	const [task, setTask] = useState<Task | null>(null);
+	const [touched, setTouched] = useState<{ title: boolean; description: boolean }>({
+		title: false,
+		description: false,
+	});
 
-	const handleChange = (
-		e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>,
-		value: string | boolean
-	) => {
-		console.log('change');
+	useEffect(() => {
+		if (params.id) {
+			const taskToUpdate = filteredTasks.find((t) => t.id === parseInt(params.id!));
+			if (taskToUpdate) {
+				setTask(taskToUpdate);
+				setFormData({
+					title: taskToUpdate.title,
+					description: taskToUpdate.description,
+					done: taskToUpdate.done,
+				});
+			}
+		} else {
+			setFormData(initialState);
+		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [params, filteredTasks]);
 
-		setFormData({
-			...formData,
-			[e.target.name]: value, // Actualiza solo el campo modificado
-		});
+	const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+		const { name, value, type } = e.target;
+
+		if (type === 'checkbox') {
+			const target = e.target as HTMLInputElement;
+			setFormData({ ...formData, [name]: target.checked });
+		} else {
+			setFormData({ ...formData, [name]: value });
+		}
+	};
+
+	const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+		setTouched({ ...touched, [e.target.name]: true });
 	};
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
-		setFormData({
-			...formData,
-			done: true,
-		});
-		console.log(formData); // Datos del formulario
-		// handleLogin(formData.email, formData.password);
-		cleanUp();
 
-			navigate('/tasks/');
-	};
-
-	const cleanUp = () => {
-		setFormData(initialState);
-	};
-
-	const showTaskDetails = ({ task }: { task: Task }) => {
-		// const task = await getTaskDetails(id);
-		if (!task) return;
-
-		setFormData({ title: task.title, description: task.description, done: task.done });
-	};
-
-	useEffect(() => {
-		if (params.id) {
-			const taskFiltered = filteredTasks.find((t) => t.id == parseInt(params.id!));
-
-			if (taskFiltered) {
-				setTask(taskFiltered);
-
-				showTaskDetails({ task: taskFiltered });
-			}
+		if (params.id && task) {
+			const updatedTask: Task = {
+				id: task.id,
+				...formData,
+				createdAt: task.createdAt,
+			};
+			handleUpdate({ id: task.id, task: updatedTask });
 		} else {
-			cleanUp();
+			handleCreate({ task: formData });
 		}
-	}, [params, filteredTasks]);
+
+		navigate('/tasks/');
+	};
+
+	const isValid = formData.title.trim() !== '' && formData.description.trim() !== '';
 
 	return (
-		<div className='w-full max-w-sm m-5'>
-			<form className='bg-[#bfc0e7] shadow-md rounded px-8 pt-6 pb-8 mb-4'>
-				<div className='mb-4'>
-					<label className='block text-gray-800 text-sm font-bold mb-2' htmlFor='title'>
-						Title
-					</label>
-					<input
-						className='shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'
-						id='title'
-						type='Text'
-						placeholder='title...'
-						name='title'
-						value={formData.title}
-						onChange={(e) => handleChange(e, e.target.value)}
-					/>
-				</div>
-				<div className='mb-6'>
-					<label className='block text-gray-800 text-sm font-bold mb-2' htmlFor='description'>
-						Description
-					</label>
-					<textarea
-						className='h-40 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'
-						id='description'
-						// type="textarea"
-						placeholder='Description...'
-						name='description'
-						value={formData.description}
-						onChange={(e) => handleChange(e, e.target.value)}
-					/>
-				</div>
-				<div className='flex items-center justify-between'>
-					<div className='flex items-center'>
-						<label htmlFor='default-checkbox' className='me-3 block text-gray-800 text-sm font-bold '>
-							Completed:
-						</label>
-						<input
-							name='done'
-							id='default-checkbox'
-							type='checkbox'
-							value=''
-							className='w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600'
-							checked={formData.done}
-							onChange={(e) => handleChange(e, e.target.checked)}
-						/>
-					</div>
-					<button
-						className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-2/5 hover:cursor-pointer'
-						type='button'
-						onClick={(e) => handleSubmit(e)}
-					>
-						{params.id && task ? 'Update' : 'Save'}
-					</button>
-				</div>
-			</form>
-		</div>
-	);
+		<form onSubmit={handleSubmit} className='flex flex-col gap-5 bg-gray-50 shadow-md rounded-xl p-6'>
+			<div>
+				<label className='block text-gray-700 text-sm font-semibold mb-1' htmlFor='title'>
+					Title
+				</label>
+				<input
+					id='title'
+					type='text'
+					name='title'
+					placeholder='Enter task title'
+                    maxLength={34}
+					value={formData.title}
+					onChange={handleChange}
+					onBlur={handleBlur}
+					className='w-full px-4 py-2 border rounded-lg text-gray-700 focus:ring focus:ring-blue-300'
+				/>
+				{touched.title && formData.title.trim() === '' && (
+					<p className='text-red-500 text-xs mt-1'>Title is required</p>
+				)}
+			</div>
 
-	// return (
-	// 	<div>
-	// 		{task.title}
-	// 		<input type='text' />
-	// 	</div>
-	// );
+			<div>
+				<label className='block text-gray-700 text-sm font-semibold mb-1' htmlFor='description'>
+					Description
+				</label>
+				<textarea
+					id='description'
+					name='description'
+					placeholder='Enter task description'
+					value={formData.description}
+					onChange={handleChange}
+					onBlur={handleBlur}
+					className='w-full px-4 py-2 border rounded-lg text-gray-700 focus:ring focus:ring-blue-300 h-32'
+				></textarea>
+				{touched.description && formData.description.trim() === '' && (
+					<p className='text-red-500 text-xs mt-1'>Description is required</p>
+				)}
+			</div>
+
+			<div className='flex items-center gap-2'>
+				<input
+					id='done'
+					type='checkbox'
+					name='done'
+					checked={formData.done}
+					onChange={handleChange}
+					className='w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring focus:ring-blue-300'
+				/>
+				<label htmlFor='done' className='text-gray-700 text-sm font-semibold'>
+					Mark as Completed
+				</label>
+			</div>
+
+			<button
+				type='submit'
+				disabled={!isValid}
+				className={`font-bold py-2 px-4 rounded-lg focus:ring focus:ring-blue-300 transition duration-200 ${
+					isValid
+						? 'bg-blue-500 hover:bg-blue-600 text-white cursor-pointer'
+						: 'bg-gray-300 text-gray-500 cursor-not-allowed'
+				}`}
+			>
+				{params.id && task ? 'Update Task' : 'Create Task'}
+			</button>
+		</form>
+	);
 };
 
 export default TaskForm;

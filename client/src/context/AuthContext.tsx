@@ -1,6 +1,6 @@
 import { useState, useEffect, ReactNode, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { login, logout, refresh } from '../api/use.api';
+import { login, logout, refresh, register } from '../api/use.api';
 import { Tokens } from '../utils/types';
 import { AuthContext } from '../hooks/useAuthContext';
 import { jwtDecode } from 'jwt-decode';
@@ -20,6 +20,24 @@ export const AuthProvider: React.FC<Props> = ({ children }) => {
 	const [loading, setLoading] = useState(true);
 
 	const isRefreshing = useRef(false);
+
+	const handleRegister = async ({
+		firstName,
+		lastName,
+		email,
+		password,
+	}: {
+		firstName: string;
+		lastName: string;
+		email: string;
+		password: string;
+	}) => {
+		const success = await register({ firstName, lastName, email, password });
+
+		if (success) {
+			navigate('/login');
+		}
+	};
 
 	const handleLogin = async ({ email, password }: { email: string; password: string }) => {
 		const tokensData = await login({ email, password });
@@ -85,6 +103,7 @@ export const AuthProvider: React.FC<Props> = ({ children }) => {
 	}, [tokens]);
 
 	const contextData = {
+		handleRegister,
 		handleLogin,
 		tokens,
 		handleLogout,

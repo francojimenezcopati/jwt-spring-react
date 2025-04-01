@@ -1,7 +1,7 @@
 import { useEffect, useReducer } from 'react';
 import { FilterValue, Id, Task, TaskContextType, TaskRequest } from '../utils/types';
 import { TASK_FILTERS } from '../utils/consts';
-import { deleteTask, getTasks, updateTask } from '../api/use.api';
+import { createTask, deleteAllTasks, deleteTask, getTasks, updateTask } from '../api/use.api';
 import { useAuthContext } from './useAuthContext';
 
 const initialState: State = {
@@ -19,11 +19,10 @@ const initialState: State = {
 type Action =
 	| { type: 'INIT_TASKS'; payload: { tasks: Task[] } }
 	| { type: 'CLEAR_COMPLETED' }
+	| { type: 'CREATE'; payload: { task: Task } }
 	| { type: 'UPDATE'; payload: { id: Id; task: Task } }
 	| { type: 'FILTER_CHANGE'; payload: { filter: FilterValue } }
 	| { type: 'DELETE'; payload: { id: Id } };
-// | { type: 'CREATE'; payload: {title: Title, description: Description, done: Done}}
-// | { type: 'UPDATE'; payload: { id: Id, title: Title, description: Description, done: Done } }
 
 interface State {
 	tasks: Task[];
@@ -44,6 +43,16 @@ const reducer = (state: State, action: Action): State => {
 			return {
 				...state,
 				tasks: tasks.filter((task) => !task.done),
+			};
+		}
+		case 'CREATE': {
+			const { task } = action.payload;
+			const tasks = [...state.tasks];
+			tasks.push(task);
+
+			return {
+				...state,
+				tasks,
 			};
 		}
 		case 'UPDATE': {
@@ -84,6 +93,14 @@ export const useTasks = (): TaskContextType => {
 		}
 	};
 
+	const handleCreate = async ({ task }: { task: TaskRequest }) => {
+		const createdTask = await createTask({ accessToken, task });
+
+		if (createdTask) {
+			dispatch({ type: 'CREATE', payload: { task: createdTask } });
+		}
+	};
+
 	const handleUpdate = async ({ id, task }: { id: Id; task: Task }) => {
 		const taskRequest: TaskRequest = {
 			title: task.title,
@@ -106,8 +123,11 @@ export const useTasks = (): TaskContextType => {
 		window.history.pushState({}, '', `${window.location.pathname}?${params.toString()}`);
 	};
 
-	const onClearCompleted = () => {
-		dispatch({ type: 'CLEAR_COMPLETED' });
+	const onClearCompleted = async () => {
+		const success = await deleteAllTasks({ accessToken });
+		if (success) {
+			dispatch({ type: 'CLEAR_COMPLETED' });
+		}
 	};
 
 	useEffect(() => {
@@ -119,8 +139,7 @@ export const useTasks = (): TaskContextType => {
 				}
 				dispatch({ type: 'INIT_TASKS', payload: { tasks: taskToDispatch } });
 			});
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	}, [tokens]);
 
 	const activeCount = tasks.filter((task) => !task.done).length;
 	const completedCount = tasks.length - activeCount;
@@ -135,10 +154,11 @@ export const useTasks = (): TaskContextType => {
 		activeCount,
 		completedCount,
 		filterSelected,
-		handleUpdate,
-		onClearCompleted,
 		handleFilterChange,
-		handleDelete,
 		filteredTasks,
+		handleCreate,
+		handleUpdate,
+		handleDelete,
+		onClearCompleted,
 	};
 };

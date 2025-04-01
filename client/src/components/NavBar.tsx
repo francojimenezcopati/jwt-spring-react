@@ -5,14 +5,16 @@ const NavBar = () => {
 	const { tokens, handleLogout } = useAuthContext();
 
 	return (
-		<nav className="w-full bg-white shadow-md py-4 px-10 flex justify-between items-center">
+		<nav className="sticky left-0 top-0 w-full">
+            <div className='w-full bg-white shadow-md py-4 px-10 flex justify-between items-center'>
+
 			<div className="flex gap-6">
 				{tokens && (
 					<>
 						<Link className="text-2xl text-gray-800 font-semibold hover:text-blue-500 transition" to="/tasks">
 							Home
 						</Link>
-						<Link className="text-2xl text-gray-800 font-semibold hover:text-blue-500 transition" to="/create-task">
+						<Link className="text-2xl text-gray-800 font-semibold hover:text-blue-500 transition" to="/tasks/create">
 							Create Task
 						</Link>
 					</>
@@ -38,6 +40,7 @@ const NavBar = () => {
 					</>
 				)}
 			</div>
+            </div>
 		</nav>
 	);
 };

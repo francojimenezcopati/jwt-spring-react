@@ -28,7 +28,13 @@ public class TaskController {
 		ResponseDTO responseDTO = this.taskService.createTask(taskRequestDTO);
 		return new ResponseEntity<ResponseDTO>(responseDTO, responseDTO.status());
 	}
-	
+
+	@DeleteMapping(path = "/")
+	public ResponseEntity<ResponseDTO> deleteAllTasks() {
+		ResponseDTO responseDTO = this.taskService.deleteAllTasks();
+		return new ResponseEntity<ResponseDTO>(responseDTO, responseDTO.status());
+	}
+
 	@PutMapping(path = {"{taskId}", "{taskId}/"})
 	public ResponseEntity<ResponseDTO> updateTask(@PathVariable("taskId") Long taskId, @RequestBody TaskRequestDTO taskRequestDTO) {
 		ResponseDTO responseDTO = this.taskService.updateTask(taskId, taskRequestDTO);

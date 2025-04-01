@@ -5,6 +5,7 @@ import Footer from '../components/Footer';
 import { useTaskContext } from '../hooks/useTaskContext';
 
 const TasksPage = () => {
+            // window.location.reload();
 	const { filteredTasks } = useTaskContext();
 
 	return (
