@@ -1,9 +1,7 @@
 package estamos.devuelta.comeback.admin;
 
 import estamos.devuelta.comeback.ResponseDTO;
-import estamos.devuelta.comeback.Task.Task;
-import estamos.devuelta.comeback.Task.TaskDTOMapper;
-import estamos.devuelta.comeback.Task.TaskRepository;
+import estamos.devuelta.comeback.Task.*;
 import estamos.devuelta.comeback.appuser.AppUser;
 import estamos.devuelta.comeback.appuser.AppUserDTOMapper;
 import estamos.devuelta.comeback.appuser.AppUserRepository;
@@ -14,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +28,7 @@ public class AdminService {
 		List<Task> tasks = this.taskRepository.findAll();
 
 		return new ResponseDTO(true, "Tasks listed successfully", tasks.stream().map(this.taskDTOMapper).toList(),
-				HttpStatus.CREATED);
+				HttpStatus.OK);
 	}
 
 	public ResponseDTO getAllUsers() {
@@ -71,5 +70,26 @@ public class AdminService {
 		}
 
 		return new ResponseDTO(false, "Task not found with id: " + taskId, null, HttpStatus.NOT_FOUND);
+	}
+
+	public ResponseDTO updateTask(Long taskId, TaskRequestDTO taskRequestDTO) {
+		Optional<Task> optionalTask = this.taskRepository.findById(taskId);
+
+		if (optionalTask.isPresent()) {
+			Task taskToUpdate = optionalTask.get();
+			taskToUpdate.setTitle(taskRequestDTO.title());
+			taskToUpdate.setDescription(taskRequestDTO.description());
+			taskToUpdate.setDone(taskRequestDTO.done());
+
+			try {
+				TaskDTO taskDTO = this.taskDTOMapper.apply(this.taskRepository.save(taskToUpdate));
+				return new ResponseDTO(true, "Task updated successfully", taskDTO, HttpStatus.OK);
+			} catch (Exception e) {
+				return new ResponseDTO(false, "An error occurred trying to save the task: " + e.getMessage(), null,
+						HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+		} else {
+			return new ResponseDTO(false, "Task not found with id: " + taskId, null, HttpStatus.NOT_FOUND);
+		}
 	}
 }

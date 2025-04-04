@@ -18,7 +18,7 @@ const Filters: React.FC = () => {
 
 				return (
 					<li key={key}>
-						<a href={href} className={className} onClick={handleClick(key as FilterValue)}>
+						<a href={href} className={className + ' afilter'} onClick={handleClick(key as FilterValue)}>
 							{literal}
 						</a>
 					</li>

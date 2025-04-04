@@ -7,6 +7,7 @@ public record TaskDTO(
 		String title,
 		String description,
 		boolean done,
-		LocalDate createdAt
+		LocalDate createdAt,
+		String userEmail
 ) {
 }

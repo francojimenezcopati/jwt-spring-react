@@ -6,6 +6,8 @@ export const API_URLS = {
     ADMIN: BASE_URL + 'admin/'
 } as const
 
+export const ContentTypeHeader = { 'Content-Type': 'application/json' } as const;
+
 export const METHODS = {
     POST: "POST",
     GET: "GET",

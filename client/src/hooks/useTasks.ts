@@ -1,8 +1,9 @@
 import { useEffect, useReducer } from 'react';
 import { FilterValue, Id, Task, TaskContextType, TaskRequest } from '../utils/types';
 import { TASK_FILTERS } from '../utils/consts';
-import { createTask, deleteAllTasks, deleteTask, getTasks, updateTask } from '../api/use.api';
+import { createTask, deleteAllTasks, deleteTask, getTasks, updateTask } from '../api/tasks.api';
 import { useAuthContext } from './useAuthContext';
+import { getAllTasks, updateAnyTask } from '../api/admin.api';
 
 const initialState: State = {
 	tasks: [],
@@ -82,7 +83,7 @@ const reducer = (state: State, action: Action): State => {
 
 export const useTasks = (): TaskContextType => {
 	const [{ tasks, filterSelected }, dispatch] = useReducer(reducer, initialState);
-	const { tokens } = useAuthContext();
+	const { tokens, userRole } = useAuthContext();
 	const accessToken = tokens ? tokens.accessToken : '';
 
 	const handleDelete = async ({ id }: { id: Id }) => {
@@ -108,7 +109,13 @@ export const useTasks = (): TaskContextType => {
 			done: task.done,
 		};
 
-		const updatedTask = await updateTask({ accessToken, id, task: taskRequest });
+		let updatedTask: Task | null = null;
+
+		if (userRole === 'ADMIN') {
+			updatedTask = await updateAnyTask({ accessToken, id, task: taskRequest });
+		} else if (userRole === 'USER') {
+			updatedTask = await updateTask({ accessToken, id, task: taskRequest });
+		}
 
 		if (updatedTask) {
 			dispatch({ type: 'UPDATE', payload: { id, task: updatedTask } });
@@ -131,14 +138,27 @@ export const useTasks = (): TaskContextType => {
 	};
 
 	useEffect(() => {
-		if (tokens)
-			getTasks({ accessToken: tokens.accessToken }).then((tasks) => {
-				let taskToDispatch: Task[] = [];
-				if (tasks !== null) {
-					taskToDispatch = tasks;
-				}
-				dispatch({ type: 'INIT_TASKS', payload: { tasks: taskToDispatch } });
-			});
+		if (tokens) {
+			let initialTasks: Task[] = [];
+            console.log(userRole);
+
+			if (userRole === 'ADMIN') {
+				getAllTasks({ accessToken: tokens.accessToken }).then((tasks) => {
+					if (tasks !== null) {
+						initialTasks = tasks;
+					}
+					dispatch({ type: 'INIT_TASKS', payload: { tasks: initialTasks } });
+				});
+			} else if (userRole === 'USER') {
+				getTasks({ accessToken: tokens.accessToken }).then((tasks) => {
+					if (tasks !== null) {
+						initialTasks = tasks;
+					}
+					dispatch({ type: 'INIT_TASKS', payload: { tasks: initialTasks } });
+				});
+			}
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [tokens]);
 
 	const activeCount = tasks.filter((task) => !task.done).length;

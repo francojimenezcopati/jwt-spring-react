@@ -40,7 +40,8 @@ public class JwtService {
 	private String buildToken(AppUser user, String expirationMs) {
 		return Jwts.builder()
 				.id(user.getId().toString()) // TOTALMENTE OPCIONAL
-				.claims(Map.of("name", user.getFirstName())) // TOTALMENTE OPCIONAL, info extra de pana
+				.claims(Map.of("name", user.getFirstName(), "role",
+						user.getRole())) // TOTALMENTE OPCIONAL, info extra de pana
 				.subject(user.getEmail())
 				.issuedAt(new Date(System.currentTimeMillis()))
 				.expiration(new Date(System.currentTimeMillis() + Integer.parseInt(expirationMs)))

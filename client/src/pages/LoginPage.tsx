@@ -16,12 +16,12 @@ const LoginPage = () => {
 			</div>
 		</div>
 
-        <div className='translate-y-32'>
+        {/* <div className='translate-y-32'>
             <span>Fast access:</span>
             <div className='w-20 h-20 bg-red-500'>
 
             </div>
-        </div>
+        </div> */}
         </div>
 	);
 };

@@ -16,7 +16,8 @@ public class TaskDTOMapper implements Function<Task, TaskDTO> {
 				task.getTitle(),
 				task.getDescription(),
 				task.isDone(),
-				task.getCreatedAt()
+				task.getCreatedAt(),
+				task.getAppUser().getEmail()
 		);
 	}
 }

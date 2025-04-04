@@ -1,7 +1,7 @@
 import { useState, useEffect, ReactNode, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { login, logout, refresh, register } from '../api/use.api';
-import { Tokens } from '../utils/types';
+import { login, logout, refresh, register } from '../api/auth.api';
+import { AuthContextType, TokenClaims, Tokens, UserRoles } from '../utils/types';
 import { AuthContext } from '../hooks/useAuthContext';
 import { jwtDecode } from 'jwt-decode';
 
@@ -13,10 +13,10 @@ export const AuthProvider: React.FC<Props> = ({ children }) => {
 	const navigate = useNavigate();
 
 	const localTokens = (): Tokens | null => JSON.parse(localStorage.getItem('tokens') ?? 'null');
-	const localEmail = (): { email: string } | null => JSON.parse(localStorage.getItem('email') ?? 'null');
 
 	const [tokens, setTokens] = useState<Tokens | null>(localTokens);
-	const [userEmail, setUserEmail] = useState<string | null>(localEmail()?.email ?? null);
+	const [userEmail, setUserEmail] = useState<string | null>(null);
+	const [userRole, setUserRole] = useState<UserRoles | null>(null);
 	const [loading, setLoading] = useState(true);
 
 	const isRefreshing = useRef(false);
@@ -44,10 +44,11 @@ export const AuthProvider: React.FC<Props> = ({ children }) => {
 
 		setTokens(tokensData);
 		if (tokensData) {
-			const email = jwtDecode(tokensData.accessToken).sub!;
-			setUserEmail(email);
+			const { sub, role } = jwtDecode<TokenClaims>(tokensData.accessToken);
+			setUserEmail(sub!);
+			setUserRole(role as UserRoles);
+
 			localStorage.setItem('tokens', JSON.stringify(tokensData));
-			localStorage.setItem('email', JSON.stringify(email));
 
 			navigate('/');
 		}
@@ -59,8 +60,8 @@ export const AuthProvider: React.FC<Props> = ({ children }) => {
 		}
 		setTokens(null);
 		setUserEmail(null);
+		setUserRole(null);
 		localStorage.removeItem('tokens');
-		localStorage.removeItem('email');
 		navigate('/login/');
 	};
 
@@ -91,6 +92,12 @@ export const AuthProvider: React.FC<Props> = ({ children }) => {
 	}, []);
 
 	useEffect(() => {
+		if (tokens) {
+			const claims = jwtDecode<TokenClaims>(tokens.accessToken);
+			setUserEmail(claims.sub!);
+			setUserRole(claims.role as UserRoles);
+		}
+
 		const nineMinutes = 1000 * 60 * 9;
 		const intervalId = setInterval(() => {
 			if (tokens) {
@@ -102,10 +109,11 @@ export const AuthProvider: React.FC<Props> = ({ children }) => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [tokens]);
 
-	const contextData = {
+	const contextData: AuthContextType = {
 		handleRegister,
 		handleLogin,
 		tokens,
+		userRole,
 		handleLogout,
 	};
 

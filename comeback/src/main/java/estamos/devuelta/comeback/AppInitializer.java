@@ -41,14 +41,20 @@ public class AppInitializer implements CommandLineRunner {
 //			taskService.createTask(task1);
 //			taskService.createTask(task2);
 
-			RegistrationRequest registrationRequest = new RegistrationRequest("pepe", "fernandez", "pepe@gmail.com",
-					"p123");
+			RegistrationRequest registrationRequest = new RegistrationRequest("Adam", "Addler", "admin@mail.com",
+					"admin123");
+			RegistrationRequest registrationRequest2 = new RegistrationRequest("Urijah", "Untim", "user@mail.com",
+					"user123");
 //
 //			this.authService.register(registrationRequest);
 			AppUser appUser = new AppUser(registrationRequest,
 					passwordEncoder.encode(registrationRequest.password()),
 					AppUserRole.ADMIN);
+			AppUser appUser2 = new AppUser(registrationRequest2,
+					passwordEncoder.encode(registrationRequest2.password()),
+					AppUserRole.USER);
 			this.appUserRepository.save(appUser);
+			this.appUserRepository.save(appUser2);
 
 			System.out.println("\n\n\n");
 			System.out.println("----------------------" + " mock data created " + "----------------------");

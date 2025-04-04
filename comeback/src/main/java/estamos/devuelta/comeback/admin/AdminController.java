@@ -1,6 +1,7 @@
 package estamos.devuelta.comeback.admin;
 
 import estamos.devuelta.comeback.ResponseDTO;
+import estamos.devuelta.comeback.Task.TaskRequestDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,6 +19,14 @@ public class AdminController {
 		ResponseDTO response = this.adminService.getAllTasks();
 
 		return new ResponseEntity<>(response, response.status());
+	}
+
+	@PutMapping(path = "tasks/{taskId}")
+	public ResponseEntity<ResponseDTO> updateTask(
+			@PathVariable("taskId") Long taskId, @RequestBody TaskRequestDTO taskRequestDTO
+	) {
+		ResponseDTO responseDTO = this.adminService.updateTask(taskId, taskRequestDTO);
+		return new ResponseEntity<>(responseDTO, responseDTO.status());
 	}
 
 	@DeleteMapping(path = "tasks/{taskId}")

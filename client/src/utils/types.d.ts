@@ -39,7 +39,7 @@ interface Tokens {
 	refreshToken: string;
 }
 
-interface AuthContextType {
+export interface AuthContextType {
 	handleRegister: ({
 		firstName,
 		lastName,
@@ -53,7 +53,22 @@ interface AuthContextType {
 	}) => Promise<void>;
 	handleLogin: ({ email, password }: { email: string; password: string }) => Promise<void>;
 	tokens: Tokens | null;
+	userRole: UserRoles | null;
 	handleLogout: () => void;
+}
+
+export type UserRoles = 'ADMIN' | 'USER';
+
+export interface TokenClaims {
+	iss?: string;
+	sub?: string;
+	aud?: string[] | string;
+	exp?: number;
+	nbf?: number;
+	iat?: number;
+	jti?: string;
+	name: string;
+	role: string;
 }
 
 export interface ApiResponse<T = unknown> {
