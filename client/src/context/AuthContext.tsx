@@ -1,10 +1,11 @@
 import { useState, useEffect, ReactNode, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login, logout, refresh, register } from '../api/auth.api';
-import { AuthContextType, Id, TokenClaims, Tokens, User, UserRole } from '../utils/types';
+import { AuthContextType, Id, TokenClaims, Tokens, User, UserRequest, UserRole } from '../utils/types';
 import { AuthContext } from '../hooks/useAuthContext';
 import { jwtDecode } from 'jwt-decode';
-import { deleteUser, getAllUsers } from '../api/admin.api';
+import { createUser, deleteUser, getAllUsers } from '../api/admin.api';
+import { toast } from 'sonner';
 
 interface Props {
 	children: ReactNode;
@@ -94,6 +95,16 @@ export const AuthProvider: React.FC<Props> = ({ children }) => {
 
 		if (success) {
 			setUsers((prevState) => prevState.filter((user) => user.id !== id));
+
+			const emailFromDeletedUser = users.filter((u) => u.id === id)[0].email;
+			if (userEmail === emailFromDeletedUser) {
+				setTokens(null);
+				setUserEmail(null);
+				setUserRole(null);
+				localStorage.removeItem('tokens');
+				navigate('/login/');
+				toast.success('You successfully deleted yourself 😄');
+			}
 		}
 	};
 
@@ -101,6 +112,21 @@ export const AuthProvider: React.FC<Props> = ({ children }) => {
 		const users = await getAllUsers({ accessToken });
 		console.log(users);
 		setUsers(users);
+	};
+
+	const handleCreateUser = async ({ user }: { user: UserRequest }) => {
+		const createdUser = await createUser({ accessToken: tokens!.accessToken, user });
+
+		if (createdUser) {
+			setUsers((prevState) => {
+				const newUsers = [...prevState];
+				newUsers.push(createdUser);
+				return newUsers;
+			});
+			toast.success('User created');
+			return true;
+		}
+		return false;
 	};
 
 	useEffect(() => {
@@ -114,7 +140,7 @@ export const AuthProvider: React.FC<Props> = ({ children }) => {
 			setUserEmail(claims.sub!);
 			setUserRole(claims.role as UserRole);
 
-			if (!loading) {
+			if (!loading && userRole === 'ADMIN') {
 				initializeUsers({ accessToken: tokens.accessToken });
 			}
 		}
@@ -138,6 +164,7 @@ export const AuthProvider: React.FC<Props> = ({ children }) => {
 		users,
 		userRole,
 		handleDeleteUser,
+		handleCreateUser,
 	};
 
 	return <AuthContext.Provider value={contextData}>{loading ? null : children}</AuthContext.Provider>;

@@ -11,6 +11,7 @@ import { Toaster } from 'sonner';
 import SignupPage from './pages/SignupPage';
 import AdminUsersPage from './pages/AdminUsersPage';
 import AdminCreateUser from './pages/AdminCreateUser';
+import Footer from './components/Footer';
 
 const App: FC = () => {
 	return (
@@ -19,7 +20,7 @@ const App: FC = () => {
 				<TaskProvider>
 					<Toaster richColors/>
 					<NavBar />
-					<div className='flex justify-center items-center w-full h-full'>
+					<div className='flex justify-center items-center w-full h-full pb-10'>
 						<div className='container max-w-[600px] '>
 							<Routes>
 								<Route path='/login' element={<LoginPage />} />
@@ -76,6 +77,7 @@ const App: FC = () => {
 							</Routes>
 						</div>
 					</div>
+                    <Footer/>
 				</TaskProvider>
 			</AuthProvider>
 		</BrowserRouter>

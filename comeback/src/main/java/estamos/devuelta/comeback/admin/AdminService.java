@@ -6,6 +6,8 @@ import estamos.devuelta.comeback.appuser.AppUser;
 import estamos.devuelta.comeback.appuser.AppUserDTOMapper;
 import estamos.devuelta.comeback.appuser.AppUserRepository;
 import estamos.devuelta.comeback.auth.access.EmailValidator;
+import estamos.devuelta.comeback.auth.config.token.Token;
+import estamos.devuelta.comeback.auth.config.token.TokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,6 +25,7 @@ public class AdminService {
 	private final AppUserDTOMapper appUserDTOMapper;
 	private final EmailValidator emailValidator;
 	private final PasswordEncoder passwordEncoder;
+	private final TokenRepository tokenRepository;
 
 	public ResponseDTO getAllTasks() {
 		List<Task> tasks = this.taskRepository.findAll();
@@ -59,6 +62,10 @@ public class AdminService {
 			return new ResponseDTO(false, "You can not delete this user", null, HttpStatus.BAD_REQUEST);
 
 		if (this.appUserRepository.findById(userId).isPresent()) {
+			AppUser appUser = this.appUserRepository.findById(userId).get();
+//			List<Token> tokensToDelete = this.tokenRepository.findAllByAppUser(appUser);
+//			this.tokenRepository.deleteAll(tokensToDelete);
+//		appUser.getTokens();
 			this.appUserRepository.deleteById(userId);
 			return new ResponseDTO(true, "User deleted successfully", null, HttpStatus.OK);
 		}

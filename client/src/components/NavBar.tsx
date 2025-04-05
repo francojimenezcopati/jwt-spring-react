@@ -5,7 +5,7 @@ const NavBar = () => {
 	const { tokens, handleLogout } = useAuthContext();
 
 	return (
-		<nav className="sticky left-0 top-0 w-full">
+		<nav className="sticky left-0 top-0 w-full z-20">
             <div className='w-full bg-white shadow-md py-4 px-10 flex justify-between items-center'>
 
 			<div className="flex gap-6">

@@ -53,11 +53,12 @@ export interface AuthContextType {
 		password: string;
 	}) => Promise<void>;
 	handleLogin: ({ email, password }: { email: string; password: string }) => Promise<void>;
-	handleLogout: () => void;
+	handleLogout: () => Promise<void>;
 	tokens: Tokens | null;
 	users: User[];
 	userRole: UserRole | null;
-	handleDeleteUser: ({ id }: { id: Id }) => void;
+	handleDeleteUser: ({ id }: { id: Id }) => Promise<void>;
+	handleCreateUser: ({ user }: { user: UserRequest }) => Promise<boolean>;
 }
 
 export type UserRole = 'ADMIN' | 'USER';

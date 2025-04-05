@@ -30,10 +30,10 @@ const TaskCard: FC<Props> = ({ task }) => {
 			/>
 			<label>
 				<div className='flex justify-between items-center pr-10 '>
-					<span className='hover:cursor-pointer' onClick={() => handleTaskClick()}>
+					<span className='hover:cursor-pointer w-full' onClick={() => handleTaskClick()}>
 						{task.title}{' '}
 					</span>
-					<div className='flex flex-col justify-center items-end'>
+					<div className='flex flex-col justify-center items-end min-w-fit'>
                         {userRole === "ADMIN" && 
 						<span className='text-lg text-gray-500'>{task.userEmail}</span>
                         }

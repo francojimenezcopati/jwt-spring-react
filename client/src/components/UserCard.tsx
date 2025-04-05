@@ -18,10 +18,10 @@ const UserCard: React.FC<Props> = ({user}) => {
 		<div className='view '>
 			<label className='user-card'>
 				<div className='flex justify-between items-center pr-10 '>
-					<span className='hover:cursor-pointer' onClick={() => handleUserClick()}>
+					<span className='hover:cursor-pointer w-full' onClick={() => handleUserClick()}>
 						{user.email}{' '}
 					</span>
-					<div className='flex flex-col justify-center items-end'>
+					<div className='flex flex-col justify-center items-end min-w-fit'>
 						<span className='text-lg text-gray-500'>{user.createdAt}</span>
 					</div>
 				</div>

@@ -1,7 +1,7 @@
 // import TaskCard from "../components/TaskCard";
 // import { getTasks } from '../api/task.api'
 import TaskCard from '../components/TaskCard';
-import Footer from '../components/Footer';
+import TaskListFooter from '../components/TaskListFooter';
 import { useTaskContext } from '../hooks/useTaskContext';
 import { useAuthContext } from '../hooks/useAuthContext';
 import AdminPanel from '../components/AdminPanel';
@@ -23,7 +23,7 @@ const TasksPage = () => {
 							</li>
 						))}
 				</ul>
-				<Footer />
+				<TaskListFooter />
 			</div>
 		</div>
 	);

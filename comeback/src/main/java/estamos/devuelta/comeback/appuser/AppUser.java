@@ -3,6 +3,7 @@ package estamos.devuelta.comeback.appuser;
 import estamos.devuelta.comeback.Task.Task;
 import estamos.devuelta.comeback.admin.AdminRegisterRequestDTO;
 import estamos.devuelta.comeback.auth.access.RegistrationRequest;
+import estamos.devuelta.comeback.auth.config.token.Token;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -50,6 +51,12 @@ public class AppUser implements UserDetails {
 			orphanRemoval = true
 	)
 	private List<Task> tasks = new ArrayList<>();
+	@OneToMany(
+			mappedBy = "appUser",
+			cascade = CascadeType.ALL,
+			orphanRemoval = true
+	)
+	private List<Token> tokens = new ArrayList<>();
 
 	public AppUser(String firstName, String lastName, String email, String password, AppUserRole role) {
 		this.firstName = firstName;
