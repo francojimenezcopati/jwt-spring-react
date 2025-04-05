@@ -98,9 +98,6 @@ export const refresh = async ({ refreshToken }: { refreshToken: string }): Promi
 		const res: ApiResponse<Tokens> = await rawRes.json();
 
 		if (res.success) {
-			// toast.success(res.message);
-			console.log('Tokens refreshed');
-
 			return res.content;
 		} else {
 			toast.error(res.message);

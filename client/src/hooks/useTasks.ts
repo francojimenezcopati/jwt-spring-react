@@ -3,7 +3,7 @@ import { FilterValue, Id, Task, TaskContextType, TaskRequest } from '../utils/ty
 import { TASK_FILTERS } from '../utils/consts';
 import { createTask, deleteAllTasks, deleteTask, getTasks, updateTask } from '../api/tasks.api';
 import { useAuthContext } from './useAuthContext';
-import { getAllTasks, updateAnyTask } from '../api/admin.api';
+import { deleteAnyTask, getAllTasks, updateAnyTask } from '../api/admin.api';
 
 const initialState: State = {
 	tasks: [],
@@ -87,7 +87,12 @@ export const useTasks = (): TaskContextType => {
 	const accessToken = tokens ? tokens.accessToken : '';
 
 	const handleDelete = async ({ id }: { id: Id }) => {
-		const success = await deleteTask({ accessToken, id });
+		let success: boolean = false; 
+		if (userRole === 'ADMIN') {
+			success = await deleteAnyTask({ accessToken, id });
+		} else if (userRole === 'USER') {
+			success = await deleteTask({ accessToken, id });
+		}
 
 		if (success) {
 			dispatch({ type: 'DELETE', payload: { id } });
@@ -140,7 +145,6 @@ export const useTasks = (): TaskContextType => {
 	useEffect(() => {
 		if (tokens) {
 			let initialTasks: Task[] = [];
-            console.log(userRole);
 
 			if (userRole === 'ADMIN') {
 				getAllTasks({ accessToken: tokens.accessToken }).then((tasks) => {

@@ -55,6 +55,9 @@ public class AdminService {
 	}
 
 	public ResponseDTO deleteUser(Long userId) {
+		if(userId < 3)
+			return new ResponseDTO(false, "You can not delete this user", null, HttpStatus.BAD_REQUEST);
+
 		if (this.appUserRepository.findById(userId).isPresent()) {
 			this.appUserRepository.deleteById(userId);
 			return new ResponseDTO(true, "User deleted successfully", null, HttpStatus.OK);

@@ -12,6 +12,7 @@ export interface Task {
 	description: string;
 	done: boolean;
 	createdAt: string;
+	userEmail: string;
 }
 
 export type Id = Task['id'];
@@ -52,12 +53,31 @@ export interface AuthContextType {
 		password: string;
 	}) => Promise<void>;
 	handleLogin: ({ email, password }: { email: string; password: string }) => Promise<void>;
-	tokens: Tokens | null;
-	userRole: UserRoles | null;
 	handleLogout: () => void;
+	tokens: Tokens | null;
+	users: User[];
+	userRole: UserRole | null;
+	handleDeleteUser: ({ id }: { id: Id }) => void;
 }
 
-export type UserRoles = 'ADMIN' | 'USER';
+export type UserRole = 'ADMIN' | 'USER';
+
+export interface User {
+	id: number;
+	firstName: string;
+	lastName: string;
+	email: string;
+	role: UserRole;
+	createdAt: string;
+}
+
+export interface UserRequest {
+	firstName: string;
+	lastName: string;
+	email: string;
+	password: string;
+	role: UserRole;
+}
 
 export interface TokenClaims {
 	iss?: string;

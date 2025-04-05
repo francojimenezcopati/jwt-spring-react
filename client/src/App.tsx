@@ -9,6 +9,8 @@ import PrivateRoute from './utils/PrivateRoute';
 import NavBar from './components/NavBar';
 import { Toaster } from 'sonner';
 import SignupPage from './pages/SignupPage';
+import AdminUsersPage from './pages/AdminUsersPage';
+import AdminCreateUser from './pages/AdminCreateUser';
 
 const App: FC = () => {
 	return (
@@ -44,6 +46,30 @@ const App: FC = () => {
 									element={
 										<PrivateRoute>
 											<TaskDetails />
+										</PrivateRoute>
+									}
+								/>
+								<Route
+									path='/admin/users'
+									element={
+										<PrivateRoute>
+											<AdminUsersPage />
+										</PrivateRoute>
+									}
+								/>
+								<Route
+									path='/admin/users/create'
+									element={
+										<PrivateRoute>
+											<AdminCreateUser />
+										</PrivateRoute>
+									}
+								/>
+								<Route
+									path='/admin/users/:id'
+									element={
+										<PrivateRoute>
+											<AdminCreateUser />
 										</PrivateRoute>
 									}
 								/>

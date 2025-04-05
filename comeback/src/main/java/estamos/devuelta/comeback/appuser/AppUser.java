@@ -11,6 +11,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -41,6 +42,7 @@ public class AppUser implements UserDetails {
 	private AppUserRole role;
 	private boolean enabled = true;
 	private boolean locked = false;
+	private LocalDate createdAt;
 
 	@OneToMany(
 			mappedBy = "appUser",
@@ -55,6 +57,7 @@ public class AppUser implements UserDetails {
 		this.email = email.toLowerCase();
 		this.password = password;
 		this.role = role;
+		this.createdAt = LocalDate.now();
 	}
 
 	public AppUser(RegistrationRequest registrationRequest, String password, AppUserRole role) {
@@ -63,6 +66,7 @@ public class AppUser implements UserDetails {
 		this.email = registrationRequest.email().toLowerCase();
 		this.password = password;
 		this.role = role;
+		this.createdAt = LocalDate.now();
 	}
 
 	public AppUser(AdminRegisterRequestDTO adminRegisterRequestDTO, String password) {
@@ -71,6 +75,7 @@ public class AppUser implements UserDetails {
 		this.email = adminRegisterRequestDTO.email().toLowerCase();
 		this.password = password;
 		this.role = adminRegisterRequestDTO.role();
+		this.createdAt = LocalDate.now();
 	}
 
 

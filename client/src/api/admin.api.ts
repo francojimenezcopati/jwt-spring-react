@@ -1,6 +1,6 @@
 import { toast } from 'sonner';
 import { API_URLS, ContentTypeHeader, METHODS } from '../utils/consts';
-import { ApiResponse, Id, Task, TaskRequest } from '../utils/types';
+import { ApiResponse, Id, Task, TaskRequest, User } from '../utils/types';
 
 export const getAllTasks = async ({ accessToken }: { accessToken: string }): Promise<Task[] | null> => {
 	try {
@@ -57,3 +57,75 @@ export const updateAnyTask = async ({
 		return null;
 	}
 };
+
+export const deleteAnyTask = async ({ accessToken, id }: { accessToken: string; id: Id }): Promise<boolean> => {
+	try {
+		const rawRes = await fetch(API_URLS.ADMIN + 'tasks/' + id, {
+			method: METHODS.DELETE,
+			headers: {
+				...ContentTypeHeader,
+				Authorization: 'Bearer ' + accessToken,
+			},
+		});
+		const res: ApiResponse<null> = await rawRes.json();
+
+		if (res.success) {
+			toast.success(res.message);
+		} else {
+			console.error(res.message);
+		}
+
+		return res.success;
+	} catch (e) {
+		console.error((e as Error).message);
+		return false;
+	}
+};
+
+export const getAllUsers = async ({ accessToken }: { accessToken: string }): Promise<User[]> => {
+	try {
+		const rawRes = await fetch(API_URLS.ADMIN + 'users', {
+			method: METHODS.GET,
+			headers: {
+				...ContentTypeHeader,
+				Authorization: 'Bearer ' + accessToken,
+			},
+		});
+		const res: ApiResponse<User[]> = await rawRes.json();
+
+		if (res.success) {
+			return res.content;
+		} else {
+			console.error(res.message);
+			return [];
+		}
+	} catch (e) {
+		console.error((e as Error).message);
+		return [];
+	}
+};
+
+export const deleteUser = async ({ accessToken, id }: { accessToken: string; id: Id }): Promise<boolean> => {
+	try {
+		const rawRes = await fetch(API_URLS.ADMIN + 'users/' + id, {
+			method: METHODS.DELETE,
+			headers: {
+				...ContentTypeHeader,
+				Authorization: 'Bearer ' + accessToken,
+			},
+		});
+		const res: ApiResponse<null> = await rawRes.json();
+
+		if (res.success) {
+			toast.success(res.message);
+		} else {
+			console.error(res.message);
+		}
+
+		return res.success;
+	} catch (e) {
+		console.error((e as Error).message);
+		return false;
+	}
+};
+

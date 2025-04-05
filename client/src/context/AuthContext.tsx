@@ -1,9 +1,10 @@
 import { useState, useEffect, ReactNode, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login, logout, refresh, register } from '../api/auth.api';
-import { AuthContextType, TokenClaims, Tokens, UserRoles } from '../utils/types';
+import { AuthContextType, Id, TokenClaims, Tokens, User, UserRole } from '../utils/types';
 import { AuthContext } from '../hooks/useAuthContext';
 import { jwtDecode } from 'jwt-decode';
+import { deleteUser, getAllUsers } from '../api/admin.api';
 
 interface Props {
 	children: ReactNode;
@@ -14,9 +15,11 @@ export const AuthProvider: React.FC<Props> = ({ children }) => {
 
 	const localTokens = (): Tokens | null => JSON.parse(localStorage.getItem('tokens') ?? 'null');
 
+	const [users, setUsers] = useState<User[]>([]);
+
 	const [tokens, setTokens] = useState<Tokens | null>(localTokens);
 	const [userEmail, setUserEmail] = useState<string | null>(null);
-	const [userRole, setUserRole] = useState<UserRoles | null>(null);
+	const [userRole, setUserRole] = useState<UserRole | null>(null);
 	const [loading, setLoading] = useState(true);
 
 	const isRefreshing = useRef(false);
@@ -46,7 +49,7 @@ export const AuthProvider: React.FC<Props> = ({ children }) => {
 		if (tokensData) {
 			const { sub, role } = jwtDecode<TokenClaims>(tokensData.accessToken);
 			setUserEmail(sub!);
-			setUserRole(role as UserRoles);
+			setUserRole(role as UserRole);
 
 			localStorage.setItem('tokens', JSON.stringify(tokensData));
 
@@ -86,6 +89,20 @@ export const AuthProvider: React.FC<Props> = ({ children }) => {
 		isRefreshing.current = false;
 	};
 
+	const handleDeleteUser = async ({ id }: { id: Id }) => {
+		const success = await deleteUser({ accessToken: tokens!.accessToken, id });
+
+		if (success) {
+			setUsers((prevState) => prevState.filter((user) => user.id !== id));
+		}
+	};
+
+	const initializeUsers = async ({ accessToken }: { accessToken: string }) => {
+		const users = await getAllUsers({ accessToken });
+		console.log(users);
+		setUsers(users);
+	};
+
 	useEffect(() => {
 		updateToken();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -95,7 +112,11 @@ export const AuthProvider: React.FC<Props> = ({ children }) => {
 		if (tokens) {
 			const claims = jwtDecode<TokenClaims>(tokens.accessToken);
 			setUserEmail(claims.sub!);
-			setUserRole(claims.role as UserRoles);
+			setUserRole(claims.role as UserRole);
+
+			if (!loading) {
+				initializeUsers({ accessToken: tokens.accessToken });
+			}
 		}
 
 		const nineMinutes = 1000 * 60 * 9;
@@ -107,14 +128,16 @@ export const AuthProvider: React.FC<Props> = ({ children }) => {
 
 		return () => clearInterval(intervalId);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [tokens]);
+	}, [tokens, loading]);
 
 	const contextData: AuthContextType = {
 		handleRegister,
 		handleLogin,
-		tokens,
-		userRole,
 		handleLogout,
+		tokens,
+		users,
+		userRole,
+		handleDeleteUser,
 	};
 
 	return <AuthContext.Provider value={contextData}>{loading ? null : children}</AuthContext.Provider>;

@@ -8,7 +8,7 @@ const AdminPanel = () => {
 				<Link className='text-2xl text-white p-4 rounded bg-blue-700  transition' to='/admin/users'>
 					Manage users
 				</Link>
-				<Link className='text-2xl text-white p-4 rounded bg-blue-700  transition' to='/admin/create-user'>
+				<Link className='text-2xl text-white p-4 rounded bg-blue-700  transition' to='/admin/users/create'>
 					Create user
 				</Link>
 			</div>

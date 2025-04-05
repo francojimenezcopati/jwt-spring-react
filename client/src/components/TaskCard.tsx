@@ -29,12 +29,16 @@ const TaskCard: FC<Props> = ({ task }) => {
 				onChange={(e) => handleUpdate({ id: task.id, task: { ...task, done: e.target.checked } })}
 			/>
 			<label>
-				<div className='flex justify-between pr-10 '>
+				<div className='flex justify-between items-center pr-10 '>
 					<span className='hover:cursor-pointer' onClick={() => handleTaskClick()}>
 						{task.title}{' '}
 					</span>
-
-					<span className='text-lg text-gray-500'>{task.createdAt}</span>
+					<div className='flex flex-col justify-center items-end'>
+                        {userRole === "ADMIN" && 
+						<span className='text-lg text-gray-500'>{task.userEmail}</span>
+                        }
+						<span className='text-lg text-gray-500'>{task.createdAt}</span>
+					</div>
 				</div>
 			</label>
 			<button className='button-todo destroy hover:cursor-pointer' onClick={() => deleteHandler({ id: task.id })} />

@@ -35,7 +35,7 @@ const TaskForm: React.FC = () => {
 		} else {
 			setFormData(initialState);
 		}
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [params, filteredTasks]);
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -61,6 +61,7 @@ const TaskForm: React.FC = () => {
 				id: task.id,
 				...formData,
 				createdAt: task.createdAt,
+				userEmail: task.userEmail,
 			};
 			handleUpdate({ id: task.id, task: updatedTask });
 		} else {
@@ -83,15 +84,13 @@ const TaskForm: React.FC = () => {
 					type='text'
 					name='title'
 					placeholder='Enter task title'
-                    maxLength={34}
+					maxLength={34}
 					value={formData.title}
 					onChange={handleChange}
 					onBlur={handleBlur}
 					className='w-full px-4 py-2 border rounded-lg text-gray-700 focus:ring focus:ring-blue-300'
 				/>
-				{touched.title && formData.title.trim() === '' && (
-					<p className='text-red-500 text-xs mt-1'>Title is required</p>
-				)}
+				{touched.title && formData.title.trim() === '' && <p className='text-red-500 text-xs mt-1'>Title is required</p>}
 			</div>
 
 			<div>
@@ -126,17 +125,27 @@ const TaskForm: React.FC = () => {
 				</label>
 			</div>
 
-			<button
-				type='submit'
-				disabled={!isValid}
-				className={`font-bold py-2 px-4 rounded-lg focus:ring focus:ring-blue-300 transition duration-200 ${
-					isValid
-						? 'bg-blue-500 hover:bg-blue-600 text-white cursor-pointer'
-						: 'bg-gray-300 text-gray-500 cursor-not-allowed'
-				}`}
-			>
-				{params.id && task ? 'Update Task' : 'Create Task'}
-			</button>
+			<div className='flex justify-center items-center gap-6 w-full'>
+				<button
+					type='button'
+					className='w-full font-bold py-2 px-4 rounded-lg focus:ring focus:ring-red-300 transition duration-200 bg-red-500 hover:bg-red-600 text-white cursor-pointer'
+					onClick={() => navigate('/tasks/')}
+				>
+					Cancel
+				</button>
+
+				<button
+					type='submit'
+					disabled={!isValid}
+					className={`w-full font-bold py-2 px-4 rounded-lg focus:ring focus:ring-blue-300 transition duration-200 ${
+						isValid
+							? 'bg-blue-500 hover:bg-blue-600 text-white cursor-pointer'
+							: 'bg-gray-300 text-gray-500 cursor-not-allowed'
+					}`}
+				>
+					{params.id && task ? 'Update Task' : 'Create Task'}
+				</button>
+			</div>
 		</form>
 	);
 };
