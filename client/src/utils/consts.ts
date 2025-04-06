@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:8080/api/v1/" as const
+const BASE_URL = `${import.meta.env.VITE_API_URL}` as const
 
 export const API_URLS = {
     AUTH: BASE_URL + 'auth/',

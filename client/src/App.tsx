@@ -14,6 +14,9 @@ import AdminCreateUser from './pages/AdminCreateUser';
 import Footer from './components/Footer';
 
 const App: FC = () => {
+    
+    // console.log(`Env: ${import.meta.env.VITE_API_URL}`);
+    
 	return (
 		<BrowserRouter>
 			<AuthProvider>
