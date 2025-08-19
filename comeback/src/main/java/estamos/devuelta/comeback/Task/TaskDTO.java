@@ -1,13 +1,10 @@
 package estamos.devuelta.comeback.Task;
 
-import java.time.LocalDate;
+import estamos.devuelta.comeback.category.Category;
 
-public record TaskDTO(
-		Long id,
-		String title,
-		String description,
-		boolean done,
-		LocalDate createdAt,
-		String userEmail
-) {
+import java.time.LocalDate;
+import java.util.List;
+
+public record TaskDTO(Long id, String title, String description, boolean done, LocalDate createdAt, String userEmail,
+					  List<String> categories) {
 }

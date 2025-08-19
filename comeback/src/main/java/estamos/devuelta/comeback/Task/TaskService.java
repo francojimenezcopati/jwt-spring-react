@@ -3,6 +3,8 @@ package estamos.devuelta.comeback.Task;
 import estamos.devuelta.comeback.ResponseDTO;
 import estamos.devuelta.comeback.appuser.AppUser;
 import estamos.devuelta.comeback.appuser.AppUserService;
+import estamos.devuelta.comeback.category.Category;
+import estamos.devuelta.comeback.category.CategoryRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -18,6 +20,7 @@ public class TaskService {
 	private final TaskRepository taskRepository;
 	private final TaskDTOMapper taskDTOMapper;
 	private final AppUserService appUserService;
+	private final CategoryRepository categoryRepository;
 
 	public ResponseDTO getTasks() {
 		AppUser appUser = this.obtainAuthenticatedUser();
@@ -40,6 +43,7 @@ public class TaskService {
 		}
 	}
 
+
 	public ResponseDTO createTask(TaskRequestDTO taskRequestDTO) {
 		if (this.taskRepository.findTaskByTitle(taskRequestDTO.title()).isPresent()) {
 			return new ResponseDTO(false, "Title already taken", null, HttpStatus.CONFLICT);
@@ -50,12 +54,25 @@ public class TaskService {
 		try {
 			Task task = new Task(taskRequestDTO.title(), taskRequestDTO.description(), taskRequestDTO.done(), appUser);
 
+			List<Category> categories = taskRequestDTO.categories()
+					.stream()
+					.map(categoryName -> new Category(categoryName, task))
+					.toList();
+
+			task.setCategories(categories);
+
 			TaskDTO taskDTO = this.taskDTOMapper.apply(this.taskRepository.save(task));
+
+			this.categoryRepository.saveAll(categories);
 
 			return new ResponseDTO(true, "Task created successfully", taskDTO, HttpStatus.CREATED);
 		} catch (Exception e) {
-			return new ResponseDTO(false, "An error occurred trying to save the task: " + e.getMessage(), null,
-					HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseDTO(
+					false,
+					"An error occurred trying to save the task: " + e.getMessage(),
+					null,
+					HttpStatus.INTERNAL_SERVER_ERROR
+			);
 		}
 	}
 
@@ -71,8 +88,12 @@ public class TaskService {
 			this.taskRepository.deleteAll(tasks);
 			return new ResponseDTO(true, "All tasks deleted", null, HttpStatus.OK);
 		} catch (Exception e) {
-			return new ResponseDTO(false, "An error occurred trying to delete the tasks: " + e.getMessage(), null,
-					HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseDTO(
+					false,
+					"An error occurred trying to delete the tasks: " + e.getMessage(),
+					null,
+					HttpStatus.INTERNAL_SERVER_ERROR
+			);
 		}
 	}
 
@@ -93,8 +114,12 @@ public class TaskService {
 				TaskDTO taskDTO = this.taskDTOMapper.apply(this.taskRepository.save(taskToUpdate));
 				return new ResponseDTO(true, "Task updated successfully", taskDTO, HttpStatus.OK);
 			} catch (Exception e) {
-				return new ResponseDTO(false, "An error occurred trying to save the task: " + e.getMessage(), null,
-						HttpStatus.INTERNAL_SERVER_ERROR);
+				return new ResponseDTO(
+						false,
+						"An error occurred trying to save the task: " + e.getMessage(),
+						null,
+						HttpStatus.INTERNAL_SERVER_ERROR
+				);
 			}
 		} else {
 			return new ResponseDTO(false, "Task not found with id: " + id, null, HttpStatus.NOT_FOUND);
@@ -132,5 +157,4 @@ public class TaskService {
 
 		return appUser;
 	}
-
 }

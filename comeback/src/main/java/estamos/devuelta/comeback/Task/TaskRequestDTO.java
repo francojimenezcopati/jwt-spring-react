@@ -1,8 +1,6 @@
 package estamos.devuelta.comeback.Task;
 
-public record TaskRequestDTO(
-		String title,
-		String description,
-		boolean done
-) {
+import java.util.List;
+
+public record TaskRequestDTO(String title, String description, boolean done, List<String> categories) {
 }

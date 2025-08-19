@@ -1,5 +1,6 @@
 package estamos.devuelta.comeback.Task;
 
+import estamos.devuelta.comeback.category.Category;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +18,8 @@ public class TaskDTOMapper implements Function<Task, TaskDTO> {
 				task.getDescription(),
 				task.isDone(),
 				task.getCreatedAt(),
-				task.getAppUser().getEmail()
+				task.getAppUser().getEmail(),
+				task.getCategories().stream().map(Category::getName).toList()
 		);
 	}
 }
