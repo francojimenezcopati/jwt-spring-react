@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @AllArgsConstructor
 @Service
@@ -111,7 +112,23 @@ public class TaskService {
 			taskToUpdate.setDone(taskRequestDTO.done());
 
 			try {
+				List<Category> newCategories = taskRequestDTO.categories()
+						.stream()
+						.map(name -> this.categoryRepository.findByName(name).map(existing -> {
+							existing.setTask(taskToUpdate);
+							return existing;
+						}).orElseGet(() -> new Category(name, taskToUpdate)))
+						.toList();
+
+				taskToUpdate.getCategories().clear();
+				taskToUpdate.getCategories().addAll(newCategories);
+
+				System.out.println("\n\n here \n\n");
+
 				TaskDTO taskDTO = this.taskDTOMapper.apply(this.taskRepository.save(taskToUpdate));
+
+				System.out.println("\n\n last \n\n");
+
 				return new ResponseDTO(true, "Task updated successfully", taskDTO, HttpStatus.OK);
 			} catch (Exception e) {
 				return new ResponseDTO(
