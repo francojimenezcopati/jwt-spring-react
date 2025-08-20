@@ -55,16 +55,13 @@ public class TaskService {
 		try {
 			Task task = new Task(taskRequestDTO.title(), taskRequestDTO.description(), taskRequestDTO.done(), appUser);
 
-			List<Category> categories = taskRequestDTO.categories()
-					.stream()
-					.map(categoryName -> new Category(categoryName, task))
-					.toList();
-
-			task.setCategories(categories);
+			taskRequestDTO.categories().forEach(categoryName -> {
+				Category category = this.categoryRepository.findByNameIgnoreCase(categoryName)
+						.orElseGet(() -> new Category(categoryName));
+				task.addCategory(category);
+			});
 
 			TaskDTO taskDTO = this.taskDTOMapper.apply(this.taskRepository.save(task));
-
-			this.categoryRepository.saveAll(categories);
 
 			return new ResponseDTO(true, "Task created successfully", taskDTO, HttpStatus.CREATED);
 		} catch (Exception e) {
@@ -111,18 +108,14 @@ public class TaskService {
 			taskToUpdate.setDescription(taskRequestDTO.description());
 			taskToUpdate.setDone(taskRequestDTO.done());
 
+			taskToUpdate.getCategories().clear();
+			taskRequestDTO.categories().forEach(categoryName -> {
+				Category category = this.categoryRepository.findByNameIgnoreCase(categoryName)
+						.orElseGet(() -> new Category(categoryName));
+				taskToUpdate.addCategory(category);
+			});
+
 			try {
-				List<Category> newCategories = taskRequestDTO.categories()
-						.stream()
-						.map(name -> this.categoryRepository.findByName(name).map(existing -> {
-							existing.setTask(taskToUpdate);
-							return existing;
-						}).orElseGet(() -> new Category(name, taskToUpdate)))
-						.toList();
-
-				taskToUpdate.getCategories().clear();
-				taskToUpdate.getCategories().addAll(newCategories);
-
 				System.out.println("\n\n here \n\n");
 
 				TaskDTO taskDTO = this.taskDTOMapper.apply(this.taskRepository.save(taskToUpdate));
@@ -157,6 +150,25 @@ public class TaskService {
 			return new ResponseDTO(true, "Task deleted successfully", null, HttpStatus.OK);
 		} else {
 			return new ResponseDTO(false, "Task not found with id: " + id, null, HttpStatus.NOT_FOUND);
+		}
+	}
+
+	public ResponseDTO getTasksByCategory(Long categoryId) {
+		AppUser appUser = this.obtainAuthenticatedUser();
+
+		try {
+			Category filterCategory = this.categoryRepository.findById(categoryId).orElseThrow();
+
+			List<Task> tasks = appUser.getTasks()
+					.stream()
+					.filter(t -> t.getCategories().contains(filterCategory))
+					.toList();
+
+			List<TaskDTO> tasksDTO = tasks.stream().map(taskDTOMapper).toList();
+
+			return new ResponseDTO(true, null, tasksDTO, HttpStatus.OK);
+		} catch (Exception e) {
+			return new ResponseDTO(false, "Category not found with id: " + categoryId, null, HttpStatus.NOT_FOUND);
 		}
 	}
 

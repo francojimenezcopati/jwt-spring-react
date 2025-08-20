@@ -9,6 +9,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -20,13 +22,18 @@ public class Category {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "category_sequence_generator")
 	@Id
 	private Long id;
+	@Column(unique = true, nullable = false)
 	private String name;
 
-	@ManyToOne
-	private Task task;
+	@ManyToMany(mappedBy = "categories")
+	private List<Task> tasks = new ArrayList<>();
 
-	public Category(String name, Task task) {
+	public Category(String name) {
 		this.name = name;
-		this.task = task;
+	}
+
+	public void addTask(Task task) {
+		this.tasks.add(task);
+		task.getCategories().add(this);
 	}
 }

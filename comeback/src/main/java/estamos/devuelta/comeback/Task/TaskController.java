@@ -22,7 +22,13 @@ public class TaskController {
 		ResponseDTO responseDTO = this.taskService.getTaskById(taskId);
 		return new ResponseEntity<ResponseDTO>(responseDTO, responseDTO.status());
 	}
-	
+
+	@GetMapping(path = "categories/{categoryId}")
+	public ResponseEntity<ResponseDTO> getTasksByCategory(@PathVariable("categoryId") Long categoryId) {
+		ResponseDTO responseDTO = this.taskService.getTasksByCategory(categoryId);
+		return new ResponseEntity<ResponseDTO>(responseDTO, responseDTO.status());
+	}
+
 	@PostMapping(path = {"", "/"})
 	public ResponseEntity<ResponseDTO> createTask(@RequestBody TaskRequestDTO taskRequestDTO) {
 		ResponseDTO responseDTO = this.taskService.createTask(taskRequestDTO);

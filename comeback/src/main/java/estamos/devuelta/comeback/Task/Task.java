@@ -34,7 +34,10 @@ public class Task {
 	@ManyToOne
 	private AppUser appUser;
 
-	@OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+	//	@OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+	@ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+	@JoinTable(name = "task_category", joinColumns = @JoinColumn(name = "task_id"), inverseJoinColumns =
+	@JoinColumn(name = "category_id"))
 	private List<Category> categories = new ArrayList<>();
 
 	public Task(String title, String description, Boolean done, AppUser appUser) {
@@ -43,5 +46,10 @@ public class Task {
 		this.done = done;
 		this.createdAt = LocalDate.now();
 		this.appUser = appUser;
+	}
+
+	public void addCategory(Category category) {
+		this.categories.add(category);
+		category.getTasks().add(this);
 	}
 }
